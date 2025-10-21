@@ -40,7 +40,7 @@ namespace DSPRE {
         public static void CheckForUpdates(bool silent = true)
         {
             AppLogger.Info("Checking for updates...");
-            var mgr = new UpdateManager(new GithubSource("https://github.com/Mixone-FinallyHere/DS-Pokemon-Rom-Editor", "", prerelease: false));
+            var mgr = new UpdateManager(new GithubSource("https://github.com/DS-Pokemon-Rom-Editor/DSPRE", "", prerelease: false));
 
             var newVersion = mgr.CheckForUpdates();
             if (newVersion == null)
@@ -236,8 +236,28 @@ namespace DSPRE {
 
         //Locate File - buttons
         public static void ExplorerSelect(string path) {
-            if (System.IO.File.Exists(path)) {
+            if (File.Exists(path)) {
                 Process.Start("explorer.exe", "/select" + "," + "\"" + path + "\"");
+            }
+        }
+
+        public static void OpenFileWithDefaultApp(string path)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    MessageBox.Show("Path is empty.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Use the system default app to open the file
+                Process.Start(new ProcessStartInfo("explorer.exe", $"\"{path}\""));                
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error($"Failed to open '{path}' with default app: {ex.Message}");
+                MessageBox.Show($"Unable to open file with the default application:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -254,8 +274,8 @@ namespace DSPRE {
                 int classMessageID = BitConverter.ToUInt16(DSUtils.ReadFromFile(path, startOffset: 1, 2), 0);
                 string currentTrainerName;
 
-                if (i < trainerNames.messages.Count) {
-                    currentTrainerName = trainerNames.messages[i];
+                if (i < trainerNames.GetSimpleTrainerNames().Count) {
+                    currentTrainerName = trainerNames.GetSimpleTrainerNames()[i];
                 } else {
                     currentTrainerName = TrainerFile.NAME_NOT_FOUND;
                 }
@@ -579,20 +599,44 @@ namespace DSPRE {
         extern static bool DestroyIcon(IntPtr handle);
 
 
-        public static void PopOutEditorHandler<T>(T control, string title, Image icon, Action<T> onClose = null) where T : Control
+     public static void PopOutEditorHandler<T>(T control, string title, Image icon, Action<T> onClose = null)
+            where T : Control
         {
+            if (control == null) return;
+            
+            if (EditorPanels.PopoutRegistry.TryGetHost(control, out var existingHost))
+            {
+                if (existingHost.WindowState == FormWindowState.Minimized) existingHost.WindowState = FormWindowState.Normal;
+                existingHost.Activate();
+                return;
+            }
+
             var originalParent = control.Parent;
             var originalIndex = originalParent?.Controls.IndexOf(control) ?? -1;
+            var originalDock = control.Dock;
 
             originalParent?.Controls.Remove(control);
-            Icon _icon = null;
-            if(icon != null)
+            
+            Icon managedIcon = null;
+            if (icon != null)
             {
-                Bitmap bitmap = new Bitmap(icon);
-                _icon = Icon.FromHandle(bitmap.GetHicon());
+                using (var bmp = new Bitmap(icon))
+                {
+                    IntPtr hIcon = bmp.GetHicon();
+                    try
+                    {
+                        using (var tmp = Icon.FromHandle(hIcon))
+                        {
+                            managedIcon = (Icon)tmp.Clone();
+                        }
+                    }
+                    finally
+                    {
+                        DestroyIcon(hIcon);
+                    }
+                }
             }
-        
-
+            
             var form = new Form
             {
                 Text = title,
@@ -600,37 +644,37 @@ namespace DSPRE {
                 FormBorderStyle = FormBorderStyle.FixedSingle,
                 MaximizeBox = false,
                 ClientSize = control.Size,
-                ShowIcon = icon == null ? false : true,
-                Icon = _icon
-                
+                ShowIcon = managedIcon != null,
+                Icon = managedIcon
             };
+            
 
             control.Dock = DockStyle.Fill;
             form.Controls.Add(control);
 
+            EditorPanels.PopoutRegistry.Add(control, form);
+
             form.FormClosing += (s, e) =>
             {
+
                 form.Controls.Remove(control);
-                if(_icon != null)
-                {
-                    DestroyIcon(_icon.Handle);
-                }
+                
                 if (originalParent != null && !originalParent.IsDisposed)
                 {
-                    if (originalIndex >= 0 && originalIndex <= originalParent.Controls.Count)
-                        originalParent.Controls.Add(control);
-                    else
-                        originalParent.Controls.Add(control);
+                    originalParent.Controls.Add(control);
+                    if (originalIndex >= 0 && originalIndex < originalParent.Controls.Count)
+                        originalParent.Controls.SetChildIndex(control, originalIndex);
 
-                    originalParent.Controls.SetChildIndex(control, originalIndex);
+                    control.Dock = originalDock;
                 }
+                
+                managedIcon?.Dispose();
 
                 onClose?.Invoke(control);
             };
 
             form.Show();
         }
-
 
         public static void PopOutEditor(Control control, string editorName, Label label, Button button, Image icon)
         {
