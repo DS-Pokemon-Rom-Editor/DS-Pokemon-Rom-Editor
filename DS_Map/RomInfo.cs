@@ -178,7 +178,8 @@ namespace DSPRE
             itemData,
             itemIcons,
 
-            tradeData
+            tradeData,
+            bugContestData
         };
 
         public static Dictionary<DirNames, (string packedDir, string unpackedDir)> gameDirs { get; private set; }
@@ -1591,6 +1592,7 @@ namespace DSPRE
 
                         [DirNames.safariZone] = $@"{dataFolderName}\a\2\3\0",
                         [DirNames.headbutt] = $@"{dataFolderName}\a\2\5\2", //both versions use the same folder with different data
+                        [DirNames.bugContestData] = $@"{dataFolderName}\data\mushi\mushi_encount.bin",
                     };
 
                     //Encounter archive is different for SS
