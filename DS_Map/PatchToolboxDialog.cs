@@ -79,7 +79,12 @@ namespace DSPRE
                     break;
 
                 case GameFamilies.HGSS:
-                    if (!OverlayUtils.OverlayTable.IsDefaultCompressed(1))
+                    if (!DSUtils.legacyMode)
+                    {
+                        DisableOverlay1patch("Deprecated");
+                        overlay1CB.Visible = true;
+                    }
+                    else if (!LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(1))
                     {
                         DisableOverlay1patch("Already applied");
                         overlay1CB.Visible = true;
@@ -213,8 +218,9 @@ namespace DSPRE
                 return false;
             }
 
-            string overlayFilePath = OverlayUtils.GetPath(data.overlayNumber);
-            OverlayUtils.Decompress(data.overlayNumber);
+            string overlayFilePath = LegacyOverlayUtils.GetPath(data.overlayNumber);
+            if (LegacyOverlayUtils.IsCompressed(data.overlayNumber))
+                LegacyOverlayUtils.Decompress(data.overlayNumber);
 
             byte[] overlayCode1 = DSUtils.HexStringToByteArray(data.overlayString1);
             byte[] overlayCode1Read = DSUtils.ReadFromFile(overlayFilePath, data.overlayOffset1, overlayCode1.Length);
@@ -456,7 +462,7 @@ namespace DSPRE
 
             if (RomInfo.gameFamily == GameFamilies.HGSS)
             {
-                if (OverlayUtils.OverlayTable.IsDefaultCompressed(data.overlayNumber))
+                if (DSUtils.legacyMode && LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(data.overlayNumber))
                 {
                     DialogResult d1 = MessageBox.Show("It is STRONGLY recommended to configure Overlay1 as uncompressed before proceeding.\n\n" +
                         "More details in the following dialog.\n\n" + "Do you want to know more?",
@@ -512,10 +518,10 @@ namespace DSPRE
                     ARM9.WriteBytes(DSUtils.HexStringToByteArray(data.branchString), data.branchOffset); //Write new branchOffset
 
                     /* Write to overlayfile */
-                    string overlayFilePath = OverlayUtils.GetPath(data.overlayNumber);
-                    if (OverlayUtils.IsCompressed(data.overlayNumber))
+                    string overlayFilePath = LegacyOverlayUtils.GetPath(data.overlayNumber);
+                    if (LegacyOverlayUtils.IsCompressed(data.overlayNumber))
                     {
-                        OverlayUtils.Decompress(data.overlayNumber);
+                        LegacyOverlayUtils.Decompress(data.overlayNumber);
                     }
 
                     DSUtils.WriteToFile(overlayFilePath, DSUtils.HexStringToByteArray(data.overlayString1), data.overlayOffset1); //Write new overlayCode1
@@ -568,7 +574,7 @@ namespace DSPRE
             bool isCompressed = false;
             string stringDecompressOverlay = "";
 
-            if (OverlayUtils.IsCompressed(1))
+            if (LegacyOverlayUtils.IsCompressed(1))
             {
                 isCompressed = true;
                 stringDecompressOverlay = "- Overlay 1 will be decompressed.\n\n";
@@ -582,10 +588,10 @@ namespace DSPRE
 
             if (d == DialogResult.Yes)
             {
-                OverlayUtils.OverlayTable.SetDefaultCompressed(1, false);
+                LegacyOverlayUtils.OverlayTable.SetDefaultCompressed(1, false);
                 if (isCompressed)
                 {
-                    OverlayUtils.Decompress(1);
+                    LegacyOverlayUtils.Decompress(1);
                 }
 
                 MessageBox.Show("Overlay1 is now configured as uncompressed.", "Operation successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -663,7 +669,7 @@ namespace DSPRE
                     //Distortion world - turnback cave Griseous Orb fix
                     if (gameFamily.Equals(GameFamilies.Plat))
                     {
-                        string ow9path = OverlayUtils.GetPath(9);
+                        string ow9path = LegacyOverlayUtils.GetPath(9);
                         int ow9offs = 0x8E20 + 10;
 
                         int itemScriptID;

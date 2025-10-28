@@ -1,5 +1,6 @@
 ﻿using DSPRE;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -28,6 +29,7 @@ namespace NarcAPI {
         }
 
         public static Narc Open(String filePath) {
+            filePath = Path.GetFullPath(filePath);
             Narc narc = new Narc(Path.GetFileNameWithoutExtension(filePath));
             BinaryReader br = new BinaryReader(File.OpenRead(filePath));
 
@@ -45,9 +47,11 @@ namespace NarcAPI {
         }
 
         public static Narc FromFolder(String dirPath) {
-            Narc narc = new Narc(Path.GetFileNameWithoutExtension(dirPath));
+            dirPath = Path.GetFullPath(dirPath);
+            Narc narc = new Narc(Path.GetDirectoryName(dirPath));
             String[] fileNames = Directory.GetFiles(dirPath, "*.*", SearchOption.AllDirectories);
 
+            // Sort filenames lexicographically to ensure consistent order
             Array.Sort(fileNames, StringComparer.OrdinalIgnoreCase);
 
             uint numberOfElements = (uint)fileNames.Length;
@@ -70,6 +74,8 @@ namespace NarcAPI {
 
         public void Save(String filePath) {
             uint fileSizeOffset, fileImageSizeOffset, curOffset;
+
+            filePath = Path.GetFullPath(filePath);
 
             BinaryWriter bw = new BinaryWriter(File.Create(filePath));
             // Write NARC Section
@@ -136,6 +142,9 @@ namespace NarcAPI {
         }
 
         public void ExtractToFolder(String dirPath, string extension = null) {
+
+            dirPath = Path.GetFullPath(dirPath);
+
             if ( string.IsNullOrWhiteSpace(dirPath) ) {
                 MessageBox.Show("Dir path + \"" + dirPath + "\" is invalid.", "Can't create directory", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;

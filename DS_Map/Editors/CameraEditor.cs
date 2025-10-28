@@ -26,7 +26,7 @@ namespace DSPRE.Editors
             RomInfo.PrepareCameraData();
             cameraEditorDataGridView.Rows.Clear();
 
-            if (OverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.cameraTblOverlayNumber)) {
+            if (DSUtils.legacyMode &&  LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(RomInfo.cameraTblOverlayNumber)) {
                 DialogResult d1 = MessageBox.Show("It is STRONGLY recommended to configure Overlay1 as uncompressed before proceeding.\n\n" +
                         "More details in the following dialog.\n\n" + "Do you want to know more?",
                         "Confirm to proceed", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -39,8 +39,8 @@ namespace DSPRE.Editors
                             "If you change your mind, you can apply it later by accessing the Patch Toolbox.",
                             "Caution", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    if (OverlayUtils.IsCompressed(RomInfo.cameraTblOverlayNumber)) {
-                        OverlayUtils.Decompress(RomInfo.cameraTblOverlayNumber);
+                    if (LegacyOverlayUtils.IsCompressed(RomInfo.cameraTblOverlayNumber)) {
+                        LegacyOverlayUtils.Decompress(RomInfo.cameraTblOverlayNumber);
                     }
                 }
             }

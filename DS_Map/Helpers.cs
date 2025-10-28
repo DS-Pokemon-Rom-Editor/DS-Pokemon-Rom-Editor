@@ -21,6 +21,15 @@ using Tao.OpenGl;
 using Velopack;
 using Velopack.Sources;
 using static DSPRE.RomInfo;
+using LibNDSFormats.NSBMD;
+using LibNDSFormats.NSBTX;
+using DSPRE.ROMFiles;
+using Images;
+using Ekona.Images;
+using ScintillaNET;
+using ScintillaNET.Utils;
+using System.Linq;
+using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace DSPRE
 {
@@ -28,7 +37,6 @@ namespace DSPRE
     {
         static MainProgram MainProgram;
 
-        public static RomInfo romInfo;
         public static bool hideBuildings = new bool();
 
         public static NSBMDGlRenderer mapRenderer;

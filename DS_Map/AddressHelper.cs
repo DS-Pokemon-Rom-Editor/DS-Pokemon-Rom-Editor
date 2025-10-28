@@ -16,7 +16,7 @@ namespace DSPRE
     public partial class AddressHelper : Form
     {
 
-        private int overlaysSize = OverlayUtils.OverlayTable.GetNumberOfOverlays();
+        private int overlaysSize = LegacyOverlayUtils.OverlayTable.GetNumberOfOverlays();
         private int ARM9LoadAddress = 0x02000000;
 
         public AddressHelper()
@@ -39,7 +39,7 @@ namespace DSPRE
 
 
                 bool addressToARMLoad = convertedAddress >= ARM9LoadAddress;
-                bool addressToARMEnd = convertedAddress < OverlayUtils.OverlayTable.GetRAMAddress(0);
+                bool addressToARMEnd = convertedAddress < LegacyOverlayUtils.OverlayTable.GetRAMAddress(0);
 
                 if (addressToARMLoad && addressToARMEnd)
                 {
@@ -67,9 +67,9 @@ namespace DSPRE
 
             for (int i = 0; i < overlaysSize - 1; i++)
             {
-                uint currentOvlAddress = OverlayUtils.OverlayTable.GetRAMAddress(i);
+                uint currentOvlAddress = LegacyOverlayUtils.OverlayTable.GetRAMAddress(i);
                 bool checkOverlayN = currentOvlAddress >= address;
-                bool checkOverlayN1 = address < (currentOvlAddress + OverlayUtils.OverlayTable.GetUncompressedSize(i));
+                bool checkOverlayN1 = address < (currentOvlAddress + LegacyOverlayUtils.OverlayTable.GetUncompressedSize(i));
 
                 if (checkOverlayN && checkOverlayN1)
                 {
@@ -83,7 +83,7 @@ namespace DSPRE
 
         private string getOffsetInOverlay(int address, int ovlNumber)
         {
-            return $"0x{OverlayUtils.OverlayTable.GetRAMAddress(ovlNumber) - address:X4}";
+            return $"0x{LegacyOverlayUtils.OverlayTable.GetRAMAddress(ovlNumber) - address:X4}";
         }
 
     }

@@ -19,16 +19,14 @@ namespace DSPRE {
         public OverlayEditor() {
             InitializeComponent();
             overlays = new List<Overlay>();
-            int numOverlays = OverlayUtils.OverlayTable.GetNumberOfOverlays();
+            int numOverlays = LegacyOverlayUtils.OverlayTable.GetNumberOfOverlays();
             for (int i = 0; i < numOverlays; i++) {
-                Overlay ovl = new Overlay
-                {
-                    number = i,
-                    isCompressed = OverlayUtils.IsCompressed(i),
-                    isMarkedCompressed = OverlayUtils.OverlayTable.IsDefaultCompressed(i),
-                    RAMAddress = OverlayUtils.OverlayTable.GetRAMAddress(i),
-                    uncompressedSize = OverlayUtils.OverlayTable.GetUncompressedSize(i)
-                };
+                Overlay ovl = new Overlay();
+                ovl.number = i;
+                ovl.isCompressed = LegacyOverlayUtils.IsCompressed(i);
+                ovl.isMarkedCompressed = LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(i);
+                ovl.RAMAddress = LegacyOverlayUtils.OverlayTable.GetRAMAddress(i);
+                ovl.uncompressedSize = LegacyOverlayUtils.OverlayTable.GetUncompressedSize(i);
                 overlays.Add(ovl);
             }
             overlayDataGrid.DataSource = overlays;
@@ -43,28 +41,9 @@ namespace DSPRE {
             overlayDataGrid.Columns[3].ReadOnly = true;
             overlayDataGrid.Columns[4].ReadOnly = true;
 
-            // Register the new event handler for real-time checkbox updates
-            overlayDataGrid.CurrentCellDirtyStateChanged += overlayDataGrid_CurrentCellDirtyStateChanged;
-            overlayDataGrid.DataBindingComplete += overlayDataGrid_DataBindingComplete;
-        }
-
-        // new event handler to ensure mismatch highlighting after data binding
-        // seems that its because in the constructor the databinding is not done so cant make mismatch search work there
-        private void overlayDataGrid_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
-        {
-            FindMismatches(); // Apply mismatch highlighting after data binding is complete
-        }
-
-        // New event handler for real-time checkbox updates
-        private void overlayDataGrid_CurrentCellDirtyStateChanged(object sender, EventArgs e)
-        {
-            if (overlayDataGrid.CurrentCell is DataGridViewCheckBoxCell)
-            {
-                // Commit the edit immediately to update the underlying data
-                overlayDataGrid.CommitEdit(DataGridViewDataErrorContexts.Commit);
-                // Refresh the mismatch highlighting
-                FindMismatches();
-            }
+            MessageBox.Show("Using this editor is not recommended and it will be removed in the future.\n" +
+                "Please convert your folder to the new structure. The new structure will automatically handle overlays and their compression state.",
+                "Overlay Editor Deprecated", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void isMarkedCompressedButton_Click(object sender, EventArgs e) {
@@ -85,14 +64,14 @@ namespace DSPRE {
 
         private void revertChangesButton_Click(object sender, EventArgs e) {
             overlays = new List<Overlay>();
-            int numOverlays = OverlayUtils.OverlayTable.GetNumberOfOverlays();
+            int numOverlays = LegacyOverlayUtils.OverlayTable.GetNumberOfOverlays();
             for (int i = 0; i < numOverlays; i++) {
                 Overlay ovl = new Overlay();
                 ovl.number = i;
-                ovl.isCompressed = OverlayUtils.IsCompressed(i);
-                ovl.isMarkedCompressed = OverlayUtils.OverlayTable.IsDefaultCompressed(i);
-                ovl.RAMAddress = OverlayUtils.OverlayTable.GetRAMAddress(i);
-                ovl.uncompressedSize = OverlayUtils.OverlayTable.GetUncompressedSize(i);
+                ovl.isCompressed = LegacyOverlayUtils.IsCompressed(i);
+                ovl.isMarkedCompressed = LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(i);
+                ovl.RAMAddress = LegacyOverlayUtils.OverlayTable.GetRAMAddress(i);
+                ovl.uncompressedSize = LegacyOverlayUtils.OverlayTable.GetUncompressedSize(i);
                 overlays.Add(ovl);
             }
             overlayDataGrid.DataSource = overlays;
@@ -112,14 +91,14 @@ namespace DSPRE {
         private void saveChangesButton_Click(object sender, EventArgs e) {
             // This whole function needs proper optimizing, im just making dumb lists
             List<Overlay> originalOverlays = new List<Overlay>();
-            int numOverlays = OverlayUtils.OverlayTable.GetNumberOfOverlays();
+            int numOverlays = LegacyOverlayUtils.OverlayTable.GetNumberOfOverlays();
             for (int i = 0; i < numOverlays; i++) {
                 Overlay ovl = new Overlay();
                 ovl.number = i;
-                ovl.isCompressed = OverlayUtils.IsCompressed(i);
-                ovl.isMarkedCompressed = OverlayUtils.OverlayTable.IsDefaultCompressed(i);
-                ovl.RAMAddress = OverlayUtils.OverlayTable.GetRAMAddress(i);
-                ovl.uncompressedSize = OverlayUtils.OverlayTable.GetUncompressedSize(i);
+                ovl.isCompressed = LegacyOverlayUtils.IsCompressed(i);
+                ovl.isMarkedCompressed = LegacyOverlayUtils.OverlayTable.IsDefaultCompressed(i);
+                ovl.RAMAddress = LegacyOverlayUtils.OverlayTable.GetRAMAddress(i);
+                ovl.uncompressedSize = LegacyOverlayUtils.OverlayTable.GetUncompressedSize(i);
                 originalOverlays.Add(ovl);
             }
             List<string> modifiedNumbers = new List<string>();
@@ -147,11 +126,11 @@ namespace DSPRE {
 
             if (d == DialogResult.Yes) {
                 foreach (Overlay overlay in modifiedOverlays) {
-                    OverlayUtils.OverlayTable.SetDefaultCompressed(overlay.number, overlay.isMarkedCompressed);
-                    if (overlay.isCompressed && !OverlayUtils.IsCompressed(overlay.number))
-                        OverlayUtils.Compress(overlay.number);
-                    if (!overlay.isCompressed && OverlayUtils.IsCompressed(overlay.number))
-                        OverlayUtils.Decompress(overlay.number);
+                    LegacyOverlayUtils.OverlayTable.SetDefaultCompressed(overlay.number, overlay.isMarkedCompressed);
+                    if (overlay.isCompressed && !LegacyOverlayUtils.IsCompressed(overlay.number))
+                        LegacyOverlayUtils.Compress(overlay.number);
+                    if (!overlay.isCompressed && LegacyOverlayUtils.IsCompressed(overlay.number))
+                        LegacyOverlayUtils.Decompress(overlay.number);
                 }
             }
         }
