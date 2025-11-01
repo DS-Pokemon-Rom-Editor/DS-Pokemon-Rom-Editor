@@ -145,6 +145,8 @@ namespace DSPRE
                     separator_afterNsbmdUtils.Visible = false;
 
                     wildEditorButton.Visible = false;
+                    pokemonEditorButton.Visible = false;
+                    moveEditorButton.Visible = false;
                     romToolboxToolStripButton.Visible = false;
                     break;
                 case 1:
@@ -166,6 +168,8 @@ namespace DSPRE
                     separator_afterNsbmdUtils.Visible = true;
 
                     wildEditorButton.Visible = true;
+                    pokemonEditorButton.Visible = true;
+                    moveEditorButton.Visible = true;
                     romToolboxToolStripButton.Visible = true;
                     break;
                 case 2:
@@ -187,6 +191,8 @@ namespace DSPRE
                     separator_afterNsbmdUtils.Visible = true;
 
                     wildEditorButton.Visible = true;
+                    pokemonEditorButton.Visible = true;
+                    moveEditorButton.Visible = true;
                     romToolboxToolStripButton.Visible = true;
                     break;
                 case 3:
@@ -969,6 +975,8 @@ namespace DSPRE
             headerSearchToolStripMenuItem.Enabled = true;
             spawnEditorToolStripMenuItem.Enabled = true;
             otherEditorsToolStripMenuItem.Enabled = true;
+            pokemonEditorButton.Enabled = true;
+            moveEditorButton.Enabled = true;
 
             scriptCommandsButton.Enabled = true;
             if (!RomInfo.gameFamily.Equals(GameFamilies.HGSS))
@@ -986,7 +994,8 @@ namespace DSPRE
                 EditorPanels.trainerEditorTabPage.Parent = null; // Hide Trainer Editor for HGE
                 EditorPanels.tabPageEncountersEditor.Parent = null; // Hide Encounters Editor for HGE
                 wildEditorButton.Visible = false; // Hide Wild Editor button for HGE
-                personalDataEditorToolStripMenuItem.Visible = false; // Hide Personal Data Editor menu item for HGE
+                pokemonEditorToolStripMenuItem.Visible = false; // Hide Personal Data Editor menu item for HGE
+                pokemonEditorButton.Visible = false; // Hide Pokemon Editor button for HGE
                 itemEditorToolStripMenuItem.Visible = false; // Hide Item Editor menu item for HGE
                 MessageBox.Show("HGE ROM detected.\nCertain editors have been disabled as they are not compatible with HGE ROMs.\nAdditionally the following information is important:"+
                     "\n\n- Certain editors such as Move Data or Trade Editor seem to work without crashing but it is no gaurantee, use at your own peril. Also, move data will always get overwritten by hg-engine."+
@@ -1728,7 +1737,7 @@ namespace DSPRE
             Update();
         }
 
-        private void moveDataEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void moveEditorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Helpers.statusLabelMessage("Setting up Move Data Editor...");
             Update();
@@ -1754,7 +1763,7 @@ namespace DSPRE
             editor.Show();
         }
 
-        private void pokemonDataEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void pokemonEditorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             string[] itemNames = RomInfo.GetItemNames();
             string[] abilityNames = RomInfo.GetAbilityNames();
@@ -1868,6 +1877,16 @@ namespace DSPRE
                 Helpers.PopOutEditor(cfg.Control, currentTab.Text, cfg.PlaceholderLabel, cfg.PopoutButton,
                     mainTabImageList.Images[currentTab.ImageIndex]);
             }
+        }
+
+        private void pokemonEditorButton_Click(object sender, EventArgs e)
+        {
+            pokemonEditorToolStripMenuItem_Click(sender, e);
+        }
+
+        private void moveEditorButton_Click(object sender, EventArgs e)
+        {
+            moveEditorToolStripMenuItem_Click(sender, e);
         }
 
         #endregion
